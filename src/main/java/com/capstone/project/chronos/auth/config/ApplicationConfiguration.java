@@ -15,7 +15,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
 @EnableWebSecurity
-public class ApplicationConfiguration implements WebMvcConfigurer {
+public class ApplicationConfiguration {
 
   @Autowired
   private AuthenticationProvider authenticationProvider;
@@ -36,14 +36,5 @@ public class ApplicationConfiguration implements WebMvcConfigurer {
         .sessionManagement(sessionManagement -> sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
     return http.build();
-  }
-
-  @Override
-  public void addCorsMappings(CorsRegistry registry) {
-    registry.addMapping("/api/**") // Apply this rule to all /api/** endpoints
-            .allowedOrigins("http://localhost:3000") // Allow requests from localhost:3000
-            .allowedMethods("GET", "POST", "PUT", "DELETE") // Allow specific HTTP methods
-            .allowedHeaders("*") // Allow any header
-            .allowCredentials(true); // Allow credentials (cookies, HTTP authentication)
   }
 }
