@@ -31,13 +31,19 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
   @Autowired
   private UserDetailsService userDetailsService;
 
-
   @Override
   protected void doFilterInternal(
-      @NonNull HttpServletRequest request,
-      @NonNull HttpServletResponse response,
-      @NonNull FilterChain filterChain
+          @NonNull HttpServletRequest request,
+          @NonNull HttpServletResponse response,
+          @NonNull FilterChain filterChain
   ) throws ServletException, IOException {
+    // Skip filtering for public endpoints
+    String requestURI = request.getRequestURI();
+    if (isPublicEndpoint(requestURI)) {
+      filterChain.doFilter(request, response);
+      return;
+    }
+
     final String authHeader = request.getHeader("Authorization");
 
     if (authHeader == null || !authHeader.startsWith("Bearer ")) {
@@ -49,16 +55,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
       final String jwt = authHeader.substring(7);
       final String userEmail = jwtService.extractUsername(jwt);
 
-      Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
-      if (userEmail != null && authentication == null) {
+      if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
         UserDetails userDetails = this.userDetailsService.loadUserByUsername(userEmail);
 
         if (jwtService.isTokenValid(jwt, userDetails)) {
           UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
-              userDetails,
-              null,
-              userDetails.getAuthorities()
+                  userDetails,
+                  null,
+                  userDetails.getAuthorities()
           );
 
           authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
@@ -72,4 +76,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     }
   }
 
+  private boolean isPublicEndpoint(String uri) {
+    return uri.startsWith("/api/user/register") ||
+            uri.startsWith("/api/user/verifyRegistration") ||
+            uri.startsWith("/api/user/login");
+  }
 }
+

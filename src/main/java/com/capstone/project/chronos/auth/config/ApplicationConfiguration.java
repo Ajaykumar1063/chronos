@@ -27,7 +27,7 @@ public class ApplicationConfiguration {
         .csrf(csrf -> csrf.disable()) // Disable CSRF if necessary
         .authorizeHttpRequests(authorizeRequests ->
             authorizeRequests
-                .requestMatchers("api/user/register", "api/user/verifyRegistration", "api/user/login").permitAll() // Allow unauthenticated access to /register
+                .requestMatchers("/api/user/register", "/api/user/verifyRegistration", "/api/user/login").permitAll() // Allow unauthenticated access to /register
                 .anyRequest().authenticated() // Require authentication for other requests
         ).authenticationProvider(authenticationProvider)
         .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
