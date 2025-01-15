@@ -26,9 +26,10 @@ import java.util.List;
 @Setter
 @Builder
 @Table(name = "users")
-public class User implements UserDetails {
+public class User {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
+  @Column(name = "user_id")
   private Long userId;
   private String firstName;
   private String lastName;
@@ -41,28 +42,6 @@ public class User implements UserDetails {
   private String password;
   private boolean isEnabled;
 
-  @Override
-  public Collection<? extends GrantedAuthority> getAuthorities() {
-    return List.of();
-  }
 
-  @Override
-  public String getUsername() {
-    return email;
-  }
 
-  @Override
-  public boolean isAccountNonExpired() {
-    return UserDetails.super.isAccountNonExpired();
-  }
-
-  @Override
-  public boolean isAccountNonLocked() {
-    return UserDetails.super.isAccountNonLocked();
-  }
-
-  @Override
-  public boolean isCredentialsNonExpired() {
-    return UserDetails.super.isCredentialsNonExpired();
-  }
 }

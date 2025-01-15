@@ -52,7 +52,7 @@ public class JobsServiceImpl implements JobsService {
                 .orElseThrow(() -> new JobNotFoundException("User with ID " + request.getUserId() + " not found."));
 
         // Create Jobs entity
-        Jobs existingJob = jobsRepository.findByJobNameAndUserIdAndJobType(request.getJobName(), request.getUserId(), request.getScheduleType());
+        Jobs existingJob = jobsRepository.findByJobNameAndUserUserIdAndJobType(request.getJobName(), request.getUserId(), request.getScheduleType());
         if (existingJob != null) {
             throw new IllegalArgumentException("A job with the name and type already exists for this user, please choose a different name.");
         } else {
@@ -120,7 +120,7 @@ public class JobsServiceImpl implements JobsService {
      */
     public List<ViewJobResponse> viewAllJobs() throws Exception {
         User user = userService.getCurrentUser();
-        List<Jobs> jobs = jobsRepository.findByUserId(user.getUserId());
+        List<Jobs> jobs = jobsRepository.findByUserUserId(user.getUserId());
         return jobs.stream().map(job -> {
             ViewJobResponse response = new ViewJobResponse();
             response.setId(job.getId());

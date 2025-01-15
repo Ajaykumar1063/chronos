@@ -11,6 +11,7 @@ import com.capstone.project.chronos.auth.model.UserModel;
 import com.capstone.project.chronos.auth.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -75,7 +76,7 @@ public class RegistrationController {
         try {
             User authenticatedUser = _userService.autheticateUser(loginUserDto);
 
-            String jwtToken = _jwtService.generateToken(authenticatedUser);
+            String jwtToken = _jwtService.generateToken((UserDetails) authenticatedUser);
 
             LoginResponse loginResponse = new LoginResponse(jwtToken, _jwtService.getExpirationTime());
 
