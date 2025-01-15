@@ -26,7 +26,7 @@ import java.util.List;
 @Setter
 @Builder
 @Table(name = "users")
-public class User {
+public class User implements UserDetails {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   @Column(name = "user_id")
@@ -42,6 +42,29 @@ public class User {
   private String password;
   private boolean isEnabled;
 
+  @Override
+  public Collection<? extends GrantedAuthority> getAuthorities() {
+    return List.of();
+  }
 
+  @Override
+  public String getUsername() {
+    return email;
+  }
+
+  @Override
+  public boolean isAccountNonExpired() {
+    return false;
+  }
+
+  @Override
+  public boolean isAccountNonLocked() {
+    return false;
+  }
+
+  @Override
+  public boolean isCredentialsNonExpired() {
+    return false;
+  }
 
 }

@@ -29,7 +29,7 @@ public class WebSecurityConfig {
 
   @Bean
   UserDetailsService userDetailsService() {
-    return username -> (UserDetails) _userRepository.findByEmail(username)
+    return username -> _userRepository.findByEmail(username)
         .orElseThrow(() -> new UsernameNotFoundException("User not found"));
   }
 
