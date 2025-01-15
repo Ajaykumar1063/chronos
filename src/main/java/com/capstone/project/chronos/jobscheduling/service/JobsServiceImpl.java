@@ -2,6 +2,7 @@ package com.capstone.project.chronos.jobscheduling.service;
 
 import com.capstone.project.chronos.auth.entity.User;
 import com.capstone.project.chronos.auth.repository.UserRepository;
+import com.capstone.project.chronos.auth.service.UserService;
 import com.capstone.project.chronos.jobscheduling.entity.Jobs;
 import com.capstone.project.chronos.jobscheduling.enums.ScheduledType;
 import com.capstone.project.chronos.jobscheduling.enums.Status;
@@ -11,15 +12,12 @@ import com.capstone.project.chronos.jobscheduling.model.JobSubmissionResponse;
 import com.capstone.project.chronos.jobscheduling.model.RescheduleJobRequest;
 import com.capstone.project.chronos.jobscheduling.model.ViewJobResponse;
 import com.capstone.project.chronos.jobscheduling.repository.JobsRepository;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
-import java.time.format.DateTimeParseException;
-import java.util.Map;
+import java.util.List;
 
 @Service
 public class JobsServiceImpl implements JobsService {
@@ -30,14 +28,20 @@ public class JobsServiceImpl implements JobsService {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private SchedulerService schedulerService;
+
+    @Autowired
+    private UserService userService;
+
     @Override
     @Transactional
     public JobSubmissionResponse submitJob(JobSubmissionRequest request) {
         // Validate job type
         ScheduledType scheduledType;
-        if ("ONCE".equalsIgnoreCase(request.getJobType())) {
+        if ("ONCE".equalsIgnoreCase(request.getScheduleType())) {
             scheduledType = ScheduledType.ONCE;
-        } else if ("RECURRING".equalsIgnoreCase(request.getJobType())) {
+        } else if ("RECURRING".equalsIgnoreCase(request.getScheduleType())) {
             scheduledType = ScheduledType.RECURRING;
         } else {
             throw new IllegalArgumentException("Invalid job type. Must be ONCE or RECURRING.");
@@ -48,33 +52,43 @@ public class JobsServiceImpl implements JobsService {
                 .orElseThrow(() -> new JobNotFoundException("User with ID " + request.getUserId() + " not found."));
 
         // Create Jobs entity
-        Jobs existingJob = jobsRepository.findByJobNameAndUserIdAndJobType(request.getJobName(), request.getUserId(), request.getJobType());
+        Jobs existingJob = jobsRepository.findByJobNameAndUserIdAndJobType(request.getJobName(), request.getUserId(), request.getScheduleType());
         if (existingJob != null) {
             throw new IllegalArgumentException("A job with the name and type already exists for this user, please choose a different name.");
         } else {
             Jobs job = new Jobs();
             job.setUser(user);
             job.setJobName(request.getJobName());
-            job.setJobType(request.getJobType());
+            job.setJobDescription(request.getJobDescription());
             job.setScheduleType(scheduledType);
-            job.setCronExpression(request.getScheduleExpression());
-            job.setParameters(convertPayloadToJson(request.getPayload()));
+            if (request.getRecurringType() != null) {
+                job.setRecurringType(request.getRecurringType());
+            }
+            if (request.getScheduleExpression() != null) {
+                job.setCronExpressionDate(request.getScheduleExpression());
+            }
             job.setStatus(Status.PENDING);
+            job.setJobType(request.getJobType());
             job.setRetryCount(0);
-            // maxRetries is set via @PrePersist to default to 3 if not set
             job.setCreatedAt(LocalDate.now());
-            job.setUpdatedAt(LocalDate.now());
 
             // Save job
             Jobs savedJob = jobsRepository.save(job);
+            schedulerService.initiateJob(savedJob);
 
             // Return response
             return new JobSubmissionResponse(savedJob.getId(), savedJob.getStatus().name(), "Job submitted successfully.");
         }
     }
 
+    /**
+     *
+     * @param jobId
+     * @return
+     * @throws JobNotFoundException
+     */
     @Override
-    public ViewJobResponse viewJobStatus(Integer jobId) {
+    public ViewJobResponse viewJobStatus(Long jobId) throws JobNotFoundException {
         Jobs job = jobsRepository.findById(jobId)
                 .orElseThrow(() -> new JobNotFoundException("Job with ID " + jobId + " not found."));
 
@@ -82,18 +96,61 @@ public class JobsServiceImpl implements JobsService {
         response.setId(job.getId());
         response.setUserId(job.getUser().getUserId());
         response.setJobName(job.getJobName());
+        response.setJobDescription(job.getJobDescription());
         response.setJobType(job.getJobType());
+        if (job.getRecurringType() != null) {
+            response.setRecurringType(job.getRecurringType());
+        }
         response.setStatus(job.getStatus().name());
-        response.setScheduleExpression(job.getCronExpression());
-        response.setRetryCount(job.getRetryCount());
+        response.setCronExpressionDate(job.getCronExpressionDate());
+        if (job.getRetryCount() != null) {
+            response.setRetryCount(job.getRetryCount());
+        }
         response.setCreatedAt(job.getCreatedAt());
-        response.setUpdatedAt(job.getUpdatedAt());
-
+        if (job.getUpdatedAt() != null) {
+            response.setUpdatedAt(job.getUpdatedAt());
+        }
         return response;
     }
 
+    /**
+     *
+     * @return
+     * @throws Exception
+     */
+    public List<ViewJobResponse> viewAllJobs() throws Exception {
+        User user = userService.getCurrentUser();
+        List<Jobs> jobs = jobsRepository.findByUserId(user.getUserId());
+        return jobs.stream().map(job -> {
+            ViewJobResponse response = new ViewJobResponse();
+            response.setId(job.getId());
+            response.setUserId(job.getUser().getUserId());
+            response.setJobName(job.getJobName());
+            response.setJobDescription(job.getJobDescription());
+            response.setJobType(job.getJobType());
+            if (job.getRecurringType() != null) {
+                response.setRecurringType(job.getRecurringType());
+            }
+            response.setStatus(job.getStatus().name());
+            response.setCronExpressionDate(job.getCronExpressionDate());
+            if (job.getRetryCount() != null) {
+                response.setRetryCount(job.getRetryCount());
+            }
+            response.setCreatedAt(job.getCreatedAt());
+            if (job.getUpdatedAt() != null) {
+                response.setUpdatedAt(job.getUpdatedAt());
+            }
+            return response;
+        }).toList();
+    }
+
+    /**
+     *
+     * @param jobId
+     * @return
+     */
     @Override
-    public JobSubmissionResponse cancelJob(Integer jobId) {
+    public JobSubmissionResponse cancelJob(Long jobId) {
         Jobs job = jobsRepository.findById(jobId)
                 .orElseThrow(() -> new JobNotFoundException("Job with ID " + jobId + " not found."));
 
@@ -107,6 +164,12 @@ public class JobsServiceImpl implements JobsService {
         return new JobSubmissionResponse(job.getId(), job.getStatus().name(), ("Job cancelled successfully."));
     }
 
+    /**
+     *
+     * @param jobId
+     * @param request
+     * @return
+     */
     @Override
     public JobSubmissionResponse rescheduleJob(Integer jobId, RescheduleJobRequest request) {
         Jobs job = jobsRepository.findById(jobId)
@@ -115,34 +178,27 @@ public class JobsServiceImpl implements JobsService {
         if (job.getStatus() == Status.CANCELLED) {
             throw new IllegalArgumentException("Cannot reschedule a cancelled job.");
         }
-        // Update schedule expression
-        job.setCronExpression(request.getNewScheduleExpression());
 
+        if (request.getJobName() != null) {
+            job.setJobName(request.getJobName());
+        }
+        if (request.getJobDescription() != null) {
+            job.setJobDescription(request.getJobDescription());
+        }
+        if (request.getNewScheduleExpression() != null) {
+            job.setCronExpressionDate(request.getNewScheduleExpression());
+        }
+        if (request.getRecurringType() != null) {
+            job.setRecurringType(request.getRecurringType());
+        }
+        if (request.getJobType() != null) {
+            job.setJobType(request.getJobType());
+        }
+        job.setStatus(Status.PENDING);
+        job.setJobType(request.getJobType());
         job.setUpdatedAt(LocalDate.now());
         jobsRepository.save(job);
-
+        schedulerService.initiateJob(job);
         return new JobSubmissionResponse(job.getId(), job.getStatus().name(), ("Job rescheduled successfully."));
-    }
-
-
-    // Utility methods
-
-    private String convertPayloadToJson(Map<String, Object> payload) {
-        // Implement JSON conversion, e.g., using Jackson ObjectMapper
-        try {
-            ObjectMapper mapper = new ObjectMapper();
-            return mapper.writeValueAsString(payload);
-        } catch (JsonProcessingException e) {
-            throw new IllegalArgumentException("Invalid payload format.");
-        }
-    }
-
-    private LocalDate parseScheduleExpression(String expression, ScheduledType type) {
-        // Implement parsing logic based on job type
-        try {
-            return LocalDate.parse(expression);
-        } catch (DateTimeParseException e) {
-            throw new IllegalArgumentException("Invalid schedule expression format.");
-        }
     }
 }

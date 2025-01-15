@@ -9,12 +9,8 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class JobSubmissionResponse {
-    private Long id;
-    private String status;
-    private String message;
-
-    public JobSubmissionResponse(String s) {
-    }
+public class CodingChallenge {
+    private String title;
+    private String link;
+    private String difficulty;
 }
-

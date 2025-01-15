@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.LocalDate;
 import java.util.Map;
 
 @Getter
@@ -16,13 +17,16 @@ public class JobSubmissionRequest {
 
     private String jobName;
 
+    private String jobDescription;
+
     private String jobType;
+
+    private String recurringType;
 
     private String scheduleType; // Expected values: "ONCE" or "RECURRING"
 
-    private String scheduleExpression; // ISO date-time for one-time or cron expression for recurring
+    private LocalDate scheduleExpression; // ISO date-time for one-time or cron expression for recurring
 
-    private Map<String, Object> payload;
 
 
 }

@@ -27,27 +27,30 @@ public class Jobs {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
-    private Integer id;
+    private Long id;
 
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
 
-    @Column(name = "job_name")
+    @Column(name = "job_name", nullable = false)
     private String jobName;
+
+    @Column(name = "job_description", nullable = false)
+    private String jobDescription;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
     private Status status;
 
-    @Column(name = "job_type", nullable = false)
+    @Column(name = "job_type")
     private String jobType;
 
-    @Column(name = "parameters", columnDefinition = "JSON")
-    private String parameters;
+    @Column(name = "recurring_type")
+    private String recurringType;
 
-    @Column(name = "cron_expression", nullable = false)
-    private String cronExpression;
+    @Column(name = "cron_expression_date")
+    private LocalDate cronExpressionDate;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "schedule_type", nullable = false)

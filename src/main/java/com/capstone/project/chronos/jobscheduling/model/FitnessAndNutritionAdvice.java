@@ -9,12 +9,7 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class JobSubmissionResponse {
-    private Long id;
-    private String status;
-    private String message;
-
-    public JobSubmissionResponse(String s) {
-    }
+public class FitnessAndNutritionAdvice {
+    private String fitnessActivity;
+    private String nutritionAdvice;
 }
-
