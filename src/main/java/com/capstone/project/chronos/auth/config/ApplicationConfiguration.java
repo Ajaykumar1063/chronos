@@ -3,6 +3,7 @@ package com.capstone.project.chronos.auth.config;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -34,6 +35,17 @@ public class ApplicationConfiguration {
         ).authenticationProvider(authenticationProvider)
         .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
         .sessionManagement(sessionManagement -> sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+
+    return http.build();
+  }
+
+  @Bean
+  public SecurityFilterChain securityFilterChainCors(HttpSecurity http) throws Exception {
+    http.cors().and() // Enable CORS support
+            .csrf().disable() // Disable CSRF for simplicity (consider enabling it in production)
+            .authorizeRequests()
+            .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll() // Allow OPTIONS preflight request
+            .anyRequest().authenticated(); // Secure all other requests
 
     return http.build();
   }
