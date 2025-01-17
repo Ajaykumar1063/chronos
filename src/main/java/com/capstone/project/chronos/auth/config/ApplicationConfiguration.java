@@ -42,26 +42,26 @@ public class ApplicationConfiguration {
     return http.build();
   }
 
-  @Bean
-  public SecurityFilterChain securityFilterChainCors(HttpSecurity http) throws Exception {
-    http.cors().and() // Enable CORS support
-            .csrf().disable() // Disable CSRF for simplicity (consider enabling it in production)
-            .authorizeRequests()
-            .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll() // Allow OPTIONS preflight request
-            .anyRequest().authenticated(); // Secure all other requests
-
-    return http.build();
-  }
-
-  @Bean
-  public CorsFilter corsFilter() {
-    UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-    CorsConfiguration config = new CorsConfiguration();
-    config.setAllowCredentials(true);
-    config.addAllowedOrigin("http://localhost:3000"); // Add frontend origin
-    config.addAllowedHeader("*");
-    config.addAllowedMethod("*"); // Allow all HTTP methods
-    source.registerCorsConfiguration("/**", config);
-    return new CorsFilter(source);
-  }
+//  @Bean
+//  public SecurityFilterChain securityFilterChainCors(HttpSecurity http) throws Exception {
+//    http.cors().and() // Enable CORS support
+//            .csrf().disable() // Disable CSRF for simplicity (consider enabling it in production)
+//            .authorizeRequests()
+//            .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll() // Allow OPTIONS preflight request
+//            .anyRequest().authenticated(); // Secure all other requests
+//
+//    return http.build();
+//  }
+//
+//  @Bean
+//  public CorsFilter corsFilterChange() {
+//    UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+//    CorsConfiguration config = new CorsConfiguration();
+//    config.setAllowCredentials(true);
+//    config.addAllowedOrigin("http://localhost:3000"); // Add frontend origin
+//    config.addAllowedHeader("*");
+//    config.addAllowedMethod("*"); // Allow all HTTP methods
+//    source.registerCorsConfiguration("/**", config);
+//    return new CorsFilter(source);
+//  }
 }
