@@ -23,11 +23,12 @@ public class SchedulerConfig implements WebMvcConfigurer {
 
     @Override
     public void addCorsMappings(CorsRegistry registry) {
-        registry.addMapping("/**") // Apply this rule to all /** endpoints
-                .allowedOrigins("http://localhost:3000") // Allow requests from localhost:3000
-                .allowedMethods("GET", "POST", "PUT", "DELETE","OPTIONS") // Allow specific HTTP methods
-                .allowedHeaders("*") // Allow any header
-                .allowCredentials(true); // Allow credentials (cookies, HTTP authentication)
+        registry.addMapping("/**")
+                .allowedOrigins("http://localhost:3000")
+                .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
+                .allowedHeaders("*")
+                .allowCredentials(true);
     }
+
 }
 
