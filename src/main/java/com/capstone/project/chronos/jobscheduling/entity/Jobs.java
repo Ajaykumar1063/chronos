@@ -18,6 +18,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -50,7 +51,7 @@ public class Jobs {
     private String recurringType;
 
     @Column(name = "cron_expression_date")
-    private LocalDate cronExpressionDate;
+    private LocalDateTime cronExpressionDate;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "schedule_type", nullable = false)

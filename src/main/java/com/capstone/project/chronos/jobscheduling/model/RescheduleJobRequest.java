@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -15,7 +16,7 @@ public class RescheduleJobRequest {
 
     private String jobName;
     private String jobDescription;
-    private LocalDate newScheduleExpression;
+    private LocalDateTime newScheduleExpression;
     private String recurringType;
     private String jobType;
 

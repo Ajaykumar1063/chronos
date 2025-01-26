@@ -11,7 +11,7 @@ import java.util.List;
 
 public interface JobsService {
 
-    JobSubmissionResponse submitJob(JobSubmissionRequest request);
+    JobSubmissionResponse submitJob(JobSubmissionRequest request) throws Exception;
 
     ViewJobResponse viewJobStatus(Long jobId)throws JobNotFoundException;
 

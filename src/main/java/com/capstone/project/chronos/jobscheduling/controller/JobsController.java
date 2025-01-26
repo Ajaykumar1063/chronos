@@ -27,7 +27,7 @@ public class JobsController {
      * 1. Job Submission API
      */
     @PostMapping
-    public ResponseEntity<JobSubmissionResponse> submitJob(@Valid @RequestBody JobSubmissionRequest request) {
+    public ResponseEntity<JobSubmissionResponse> submitJob(@RequestBody JobSubmissionRequest request) {
         try {
             JobSubmissionResponse response = jobsService.submitJob(request);
             return new ResponseEntity<>(response, HttpStatus.CREATED);

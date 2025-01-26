@@ -36,7 +36,7 @@ public class JobsServiceImpl implements JobsService {
 
     @Override
     @Transactional
-    public JobSubmissionResponse submitJob(JobSubmissionRequest request) {
+    public JobSubmissionResponse submitJob(JobSubmissionRequest request) throws Exception {
         // Validate job type
         ScheduledType scheduledType;
         if ("ONCE".equalsIgnoreCase(request.getScheduleType())) {
@@ -48,8 +48,7 @@ public class JobsServiceImpl implements JobsService {
         }
 
         // Fetch user
-        User user = userRepository.findById(request.getUserId())
-                .orElseThrow(() -> new JobNotFoundException("User with ID " + request.getUserId() + " not found."));
+        User user = userService.getCurrentUser();
 
         // Create Jobs entity
         Jobs existingJob = jobsRepository.findByJobNameAndUserUserIdAndJobType(request.getJobName(), request.getUserId(), request.getScheduleType());

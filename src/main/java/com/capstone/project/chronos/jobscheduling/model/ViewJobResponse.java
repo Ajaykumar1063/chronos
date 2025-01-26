@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -19,7 +20,7 @@ public class ViewJobResponse {
     private String recurringType;
     private String scheduleType;
     private String status;
-    private LocalDate cronExpressionDate;
+    private LocalDateTime cronExpressionDate;
     private Integer retryCount;
     private LocalDate createdAt;
     private LocalDate updatedAt;
